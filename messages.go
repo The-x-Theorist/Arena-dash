@@ -11,8 +11,13 @@ type ClientMessage struct {
 type PlayerState struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
+<<<<<<< Updated upstream
 	X    string `json:"x"`
 	Y    string `json:"y"`
+=======
+	X    float64 `json:"x"`
+	Y    float64 `json:"y"`
+>>>>>>> Stashed changes
 }
 
 type ServerWelcome struct {
