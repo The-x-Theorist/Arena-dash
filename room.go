@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"sync"
+	"time"
 )
 
 type PlayerInput struct {
@@ -41,4 +43,86 @@ func (r *Room) RemovePlayer(playerID string) {
 
 	delete(r.Players, playerID)
 	log.Printf("Player %s left room %s", playerID, r.ID)
+}
+
+func (r *Room) Start() {
+	ticker := time.NewTicker(50 * time.Millisecond)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		// r.step()
+	}
+}
+
+func (r *Room) step() {
+	r.mu.Lock()
+
+	for {
+		select {
+		case in := <-r.Inputs: 
+			r.applyInput(in)
+		default: 
+			goto doneInputs
+		}
+	}
+
+	doneInputs:
+
+	dt := 0.05
+	for _, p := range r.Players {
+		p.Pos.X += p.Vel.X + dt
+		p.Pos.Y += p.Vel.Y + dt
+
+		clamp(&p.Pos.X, 0, 500)
+		clamp(&p.Pos.Y, 0, 500)
+	}
+
+	r.Tick++
+
+	state := ServerState{
+		Tick: r.Tick,
+	}
+
+	for _, p := range r.Players {
+		state.Players = append(state.Players, PlayerState{
+			ID: p.ID,
+			Name: p.Name,
+			X: p.Pos.X,
+			Y: p.Pos.Y,
+		})
+	}
+
+	r.mu.Unlock()
+
+	data, err := json.Marshal(state)
+
+	if err != nil {
+		log.Println("Marshal state", err)
+		return
+	}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	for id, p := range r.Players {
+		if p.Con == nil {
+			continue
+		}
+
+		if err := p.Con.WriteMessage(1, data); err != nil {
+			log.Printf("Write to player %s failed %v (removing)", id, err)
+			p.Con.Close()
+			delete(r.Players, id)
+		}
+	}
+}
+
+func clamp(value *float64, min float64, max float64) {
+	if (*value < min) {
+		*value = min
+	}
+
+	if (*value > max) {
+		* value = max
+	}
 }
