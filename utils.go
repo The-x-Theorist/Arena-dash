@@ -1,6 +1,6 @@
 package main
 
-func GenerateRoomID() string {
+func GenerateRandomID() string {
 	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	const length = 8
 	b := make([]byte, length)

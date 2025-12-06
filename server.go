@@ -1,0 +1,54 @@
+package main
+
+import (
+	"log"
+	"sync"
+
+	"github.com/gorilla/websocket"
+)
+
+type GameServer struct {
+	mu sync.Mutex
+	Rooms map[string]*Room
+}
+
+func NewGameServer() *GameServer {
+	return &GameServer{
+		Rooms: make(map[string]*Room),
+	}
+}
+
+func (s *GameServer) GetOrCreateRoom(id string) *Room {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if r, ok := s.Rooms[id]; ok {
+		return r
+	}
+
+	r := NewRoom()
+	s.Rooms[r.ID] = r
+
+	go r.Start()
+	log.Println("created room", id)
+	return r
+}
+
+func (s *GameServer) Join(roomId string, name string, conn *websocket.Conn) *Player {
+	room := s.Rooms[roomId]
+	playerID := GenerateRandomID()
+
+	p := &Player{
+		ID: playerID,
+		Name: name,
+		Pos: Vec2{
+			X: 250,
+			Y: 250,
+		},
+		Vel: Vec2{},
+		Con: conn,
+	}
+
+	room.AddPlayer(p)
+	return p
+}

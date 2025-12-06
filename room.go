@@ -23,7 +23,7 @@ type Room struct {
 
 func NewRoom() *Room {
 	return &Room{
-		ID:      GenerateRoomID(),
+		ID:      GenerateRandomID(),
 		Players: make(map[string]*Player),
 		Inputs:  make(chan PlayerInput, 128),
 	}
