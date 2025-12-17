@@ -6,18 +6,20 @@ type ClientMessage struct {
 	RoomID  string   `json:"roomId,omitempty"`
 	Seq     int      `json:"seq,omitempty"`
 	Pressed []string `json:"pressed,omitempty"`
+	Height  float64  `json:"height"`
+	Width   float64  `json:"width"`
 }
 
 type PlayerState struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-	X    float64 `json:"x"`
-	Y    float64 `json:"y"`
+	ID            string  `json:"id"`
+	Name          string  `json:"name"`
+	X             float64 `json:"x"`
+	Y             float64 `json:"y"`
+	OrbsCollected int     `json:"orbsCollected"`
 }
 
 type ServerWelcome struct {
 	PlayerID string `json:"playerId"`
-	RoomID   string `json:"roomId"`
 }
 
 type ServerState struct {

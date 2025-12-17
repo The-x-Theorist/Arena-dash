@@ -19,13 +19,24 @@ type Room struct {
 	Players map[string]*Player
 	Inputs  chan PlayerInput
 	Tick    int
+	Orb     *Orb
+	Height  float64
+	Width   float64
 }
 
-func NewRoom() *Room {
+type TickClientResponse struct {
+	Tick    int           `json:"tick"`
+	Players []PlayerState `json:"players"`
+	Type    string        `json:"type"`
+}
+
+func NewRoom(id string, height float64, width float64) *Room {
 	return &Room{
-		ID:      GenerateRoomID(),
+		ID:      id,
 		Players: make(map[string]*Player),
 		Inputs:  make(chan PlayerInput, 128),
+		Height:  height,
+		Width:   width,
 	}
 }
 
@@ -59,22 +70,22 @@ func (r *Room) step() {
 
 	for {
 		select {
-		case in := <-r.Inputs: 
+		case in := <-r.Inputs:
 			r.applyInput(in)
-		default: 
+		default:
 			goto doneInputs
 		}
 	}
 
-	doneInputs:
+doneInputs:
 
 	dt := 0.05
 	for _, p := range r.Players {
-		p.Pos.X += p.Vel.X + dt
-		p.Pos.Y += p.Vel.Y + dt
+		p.Pos.X += p.Vel.X * dt
+		p.Pos.Y += p.Vel.Y * dt
 
-		clamp(&p.Pos.X, 0, 500)
-		clamp(&p.Pos.Y, 0, 500)
+		clamp(&p.Pos.X, 0, r.Width)
+		clamp(&p.Pos.Y, 0, r.Height)
 	}
 
 	r.Tick++
@@ -85,16 +96,25 @@ func (r *Room) step() {
 
 	for _, p := range r.Players {
 		state.Players = append(state.Players, PlayerState{
-			ID: p.ID,
-			Name: p.Name,
-			X: p.Pos.X,
-			Y: p.Pos.Y,
+			ID:            p.ID,
+			Name:          p.Name,
+			X:             p.Pos.X,
+			Y:             p.Pos.Y,
+			OrbsCollected: p.OrbsCollected,
 		})
 	}
 
 	r.mu.Unlock()
 
-	data, err := json.Marshal(state)
+	r.CatchOrb()
+
+	clientMessage := TickClientResponse{
+		Tick:    state.Tick,
+		Players: state.Players,
+		Type:    "tick",
+	}
+
+	data, err := json.Marshal(clientMessage)
 
 	if err != nil {
 		log.Println("Marshal state", err)
@@ -138,17 +158,16 @@ func (r *Room) applyInput(in PlayerInput) {
 		case "RIGHT":
 			v.X += speed
 		}
-		
 	}
 	p.Vel = v
 }
 
 func clamp(value *float64, min float64, max float64) {
-	if (*value < min) {
+	if *value < min {
 		*value = min
 	}
 
-	if (*value > max) {
-		* value = max
+	if *value > max {
+		*value = max
 	}
 }

@@ -8,9 +8,10 @@ type Vec2 struct {
 }
 
 type Player struct {
-	ID   string          `json:"id"`
-	Name string          `json:"name"`
-	Pos  Vec2            `json:"pos"`
-	Vel  Vec2            `json:"-"`
-	Con  *websocket.Conn `json:"-"`
+	ID            string          `json:"id"`
+	Name          string          `json:"name"`
+	Pos           Vec2            `json:"pos"`
+	Vel           Vec2            `json:"-"`
+	Con           *websocket.Conn `json:"-"`
+	OrbsCollected int             `json:"orbsCollected"`
 }
