@@ -57,7 +57,7 @@ func (r *Room) RemovePlayer(playerID string) {
 }
 
 func (r *Room) Start() {
-	ticker := time.NewTicker(50 * time.Millisecond)
+	ticker := time.NewTicker(20 * time.Millisecond)
 	defer ticker.Stop()
 
 	for range ticker.C {

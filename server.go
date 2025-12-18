@@ -8,11 +8,7 @@ import (
 )
 
 type GameServer struct {
-<<<<<<< HEAD
 	mu    sync.Mutex
-=======
-	mu sync.Mutex
->>>>>>> main
 	Rooms map[string]*Room
 }
 
@@ -22,11 +18,7 @@ func NewGameServer() *GameServer {
 	}
 }
 
-<<<<<<< HEAD
 func (s *GameServer) GetOrCreateRoom(id string, height float64, width float64) *Room {
-=======
-func (s *GameServer) GetOrCreateRoom(id string) *Room {
->>>>>>> main
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -34,13 +26,8 @@ func (s *GameServer) GetOrCreateRoom(id string) *Room {
 		return r
 	}
 
-<<<<<<< HEAD
 	r := NewRoom(id, height, width)
 	s.Rooms[id] = r
-=======
-	r := NewRoom()
-	s.Rooms[r.ID] = r
->>>>>>> main
 
 	go r.Start()
 	log.Println("created room", id)
@@ -48,20 +35,13 @@ func (s *GameServer) GetOrCreateRoom(id string) *Room {
 }
 
 func (s *GameServer) Join(roomId string, name string, conn *websocket.Conn) *Player {
-<<<<<<< HEAD
 	s.mu.Lock()
 	defer s.mu.Unlock()
-=======
->>>>>>> main
 	room := s.Rooms[roomId]
 	playerID := GenerateRandomID()
 
 	p := &Player{
-<<<<<<< HEAD
 		ID:   playerID,
-=======
-		ID: playerID,
->>>>>>> main
 		Name: name,
 		Pos: Vec2{
 			X: 250,
@@ -73,8 +53,4 @@ func (s *GameServer) Join(roomId string, name string, conn *websocket.Conn) *Pla
 
 	room.AddPlayer(p)
 	return p
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> main
