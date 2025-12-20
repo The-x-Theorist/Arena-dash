@@ -1,5 +1,19 @@
 package main
 
+import (
+	"crypto/rand"
+	"encoding/binary"
+)
+
+var rngSeed uint64
+
+func init() {
+	// Initialize seed with cryptographically secure random bytes
+	b := make([]byte, 8)
+	rand.Read(b)
+	rngSeed = binary.BigEndian.Uint64(b)
+}
+
 func GenerateRandomID() string {
 	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	const length = 8
@@ -11,15 +25,17 @@ func GenerateRandomID() string {
 }
 
 // randIntn returns, as an int, a non-negative pseudo-random number in [0,n).
+// Uses xorshift64* algorithm with package-level seed that persists between calls.
 func randIntn(n int) int {
-	// simple xorshift, fallback if no import available
-	// using package-level seed
-	var seed = int64(0xabc12345)
-	seed ^= seed << 13
-	seed ^= seed >> 17
-	seed ^= seed << 5
-	if seed < 0 {
-		seed = -seed
+	// xorshift64* algorithm
+	rngSeed ^= rngSeed >> 12
+	rngSeed ^= rngSeed << 25
+	rngSeed ^= rngSeed >> 27
+	rngSeed *= 0x2545F4914F6CDD1D
+	
+	result := int(rngSeed % uint64(n))
+	if result < 0 {
+		result = -result
 	}
-	return int(seed % int64(n))
+	return result
 }

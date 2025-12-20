@@ -40,12 +40,19 @@ func (s *GameServer) Join(roomId string, name string, conn *websocket.Conn) *Pla
 	room := s.Rooms[roomId]
 	playerID := GenerateRandomID()
 
+	PlayerXPos := room.Width / 2
+	PlayerYPos := room.Height * 0.75
+
+	if (len(s.Rooms[roomId].Players) > 0) {
+		PlayerYPos = room.Height * 0.25
+	}
+
 	p := &Player{
 		ID:   playerID,
 		Name: name,
 		Pos: Vec2{
-			X: 250,
-			Y: 250,
+			X: PlayerXPos,
+			Y: PlayerYPos,
 		},
 		Vel: Vec2{},
 		Con: conn,
