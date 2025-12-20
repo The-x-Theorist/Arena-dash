@@ -11,19 +11,15 @@ type Orb struct {
 }
 
 func (r *Room) SpawnNewOrb() {
-	r.Orb = &Orb{
-		X: rand.Float64() * 500,
-		Y: rand.Float64() * 500,
+	r.Orb = Orb{
+		X: rand.Float64() * r.Width,
+		Y: rand.Float64() * r.Height,
 	}
 }
 
 func (r *Room) CatchOrb() {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-
-	if r.Orb == nil {
-		return
-	}
 
 	collisionRadius := 20.0 // Adjust this value based on your orb/player size
 
