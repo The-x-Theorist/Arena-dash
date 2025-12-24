@@ -19,7 +19,7 @@ type Room struct {
 	Players map[string]*Player
 	Inputs  chan PlayerInput
 	Tick    int
-	Orb     *Orb
+	Orb     Orb
 	Height  float64
 	Width   float64
 }
@@ -28,6 +28,7 @@ type TickClientResponse struct {
 	Tick    int           `json:"tick"`
 	Players []PlayerState `json:"players"`
 	Type    string        `json:"type"`
+	Orb     Orb           `json:"orb"`
 }
 
 func NewRoom(id string, height float64, width float64) *Room {
@@ -37,6 +38,10 @@ func NewRoom(id string, height float64, width float64) *Room {
 		Inputs:  make(chan PlayerInput, 128),
 		Height:  height,
 		Width:   width,
+		Orb: Orb{
+			X: 0,
+			Y: 0,
+		},
 	}
 }
 
@@ -112,6 +117,7 @@ doneInputs:
 		Tick:    state.Tick,
 		Players: state.Players,
 		Type:    "tick",
+		Orb:     r.Orb,
 	}
 
 	data, err := json.Marshal(clientMessage)
